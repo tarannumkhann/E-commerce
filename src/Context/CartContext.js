@@ -1,93 +1,65 @@
-import React from "react";
-import { useState, createContext, useEffect } from "react";
+import React, { useState, createContext, useEffect } from "react";
+
 export const CartContext = createContext();
 
-const CartProvider = ({ children }) => {
-  // cart state
+export const CartContextProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [itemAmount, setItemAmount] = useState(0);
-  //total
   const [total, setTotal] = useState(0);
 
+  // calculate total
   useEffect(() => {
-    const total = cart.reduce((accumulator, currentItem) => {
-      return accumulator + currentItem.price * currentItem.amount;
-    }, 0);
-    setTotal(total);
-  });
-
-  // update item amount
-  useEffect(() => {
-    if (cart) {
-      const amount = cart.reduce((accumulator, currentItem) => {
-        return accumulator + currentItem.amount;
-      }, 0);
-      setItemAmount(amount);
-    }
+    const totalPrice = cart.reduce(
+      (acc, item) => acc + item.price * item.amount,
+      0
+    );
+    setTotal(totalPrice);
   }, [cart]);
 
-  // add to cart
+  // calculate item amount
+  useEffect(() => {
+    const amount = cart.reduce((acc, item) => acc + item.amount, 0);
+    setItemAmount(amount);
+  }, [cart]);
+
   const addToCart = (product, id) => {
     const newItem = { ...product, amount: 1 };
-
-    // check if the item is already add to cart
-    const CartItem = cart.find((item) => {
-      return item.id === id;
-    });
-
-    // if cart item is already in the cart
-    if (CartItem) {
-      const newCart = [...cart].map((item) => {
-        if (item.id === id) {
-          return { ...item, amount: CartItem.amount + 1 };
-        } else {
-          return item;
-        }
-      });
+    const cartItem = cart.find((item) => item.id === id);
+    if (cartItem) {
+      const newCart = cart.map((item) =>
+        item.id === id ? { ...item, amount: item.amount + 1 } : item
+      );
       setCart(newCart);
     } else {
       setCart([...cart, newItem]);
     }
   };
-  
-  // remove from cart
+
   const removeFromCart = (id) => {
-    const newCart = cart.filter((item) => {
-      return item.id !== id;
-    });
-    setCart(newCart);
-  };
-  
-  // clear cart
-  const clearCart = () => {
-    setCart([]);
+    setCart(cart.filter((item) => item.id !== id));
   };
 
-  // increase Amount
+  const clearCart = () => setCart([]);
+
   const increaceAmount = (id) => {
     const cartItem = cart.find((item) => item.id === id);
-    addToCart(cartItem, id);
+    if (cartItem) addToCart(cartItem, id);
   };
 
-  // decrease Amount
   const decreaseAmount = (id) => {
-    const cartItem = cart.find((item) => {
-      return item.id === id;
-    });
+    const cartItem = cart.find((item) => item.id === id);
     if (cartItem) {
-      const newCart = cart.map((item) => {
-        if (item.id === id) {
-          return { ...item, amount: cartItem.amount - 1 };
-        } else {
-          return item;
-        }
-      });
-      setCart(newCart);
-    }
-    if (cartItem.amount < 2) {
-      removeFromCart(id);
+      if (cartItem.amount > 1) {
+        const newCart = cart.map((item) =>
+          item.id === id ? { ...item, amount: item.amount - 1 } : item
+        );
+        setCart(newCart);
+      } else {
+        removeFromCart(id);
+      }
     }
   };
+
   return (
     <CartContext.Provider
       value={{
@@ -105,4 +77,5 @@ const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
-export default CartProvider;
+
+export default CartContextProvider;

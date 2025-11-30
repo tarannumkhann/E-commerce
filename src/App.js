@@ -1,28 +1,40 @@
-import logo from "./logo.svg";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-//import pages
+
+// Pages
 import Home from "./Pages/Home";
 import ProductDetails from "./Pages/ProductDetails";
-//import component
+import CheckoutPage from "./Component/checkoutPage";
+
+// Components
 import Sidebar from "./Component/Sidebar";
 import Header from "./Component/Header";
 import Footer from "./Component/Footer";
 
+// Contexts
+import { CartContextProvider } from "./Context/CartContext";
+import SidebarContextProvider from "./Context/SidebarContext";
+import ProductProvider from "./Context/productContext";
+
 
 function App() {
   return (
-    <div>
-      <Router>
-        <Header/>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/product/:id" element={<ProductDetails/>} />
-        </Routes>
-        <Sidebar/>
-        <Footer/>
-      </Router>
-    </div>
+    <CartContextProvider>
+      <SidebarContextProvider>
+        <ProductProvider>
+          <Router>
+            <Header />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+            </Routes>
+            <Sidebar />
+            <Footer />
+          </Router>
+        </ProductProvider>
+      </SidebarContextProvider>
+    </CartContextProvider>
   );
 }
 
